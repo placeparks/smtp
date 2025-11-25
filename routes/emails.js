@@ -4,6 +4,7 @@ const nodemailer = require('nodemailer');
 const Email = require('../models/Email');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
+const { getDKIMConfig } = require('../utils/dkim');
 
 // Create reusable transporter object using environment variables or defaults
 // For production (Heroku), use external SMTP service like Gmail, SendGrid, or Mailgun
@@ -117,13 +118,25 @@ router.post('/send', auth, async (req, res) => {
         // Try to send email via SMTP
         try {
             const transporter = getTransporter();
-            const info = await transporter.sendMail({
+            
+            // Get DKIM configuration if available
+            const dkimConfig = getDKIMConfig();
+            
+            const mailOptions = {
                 from: `"${fromName}" <${from}>`, // sender address with name
                 to: to, // list of receivers
                 subject: subject, // Subject line
                 text: text, // plain text body
                 html: html, // html body
-            });
+            };
+            
+            // Add DKIM signing if configured
+            if (dkimConfig) {
+                mailOptions.dkim = dkimConfig;
+                console.log('📧 Sending email with DKIM signing');
+            }
+            
+            const info = await transporter.sendMail(mailOptions);
 
             console.log('Message sent: %s', info.messageId);
             res.json({ msg: 'Email sent', messageId: info.messageId });

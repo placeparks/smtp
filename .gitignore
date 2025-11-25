@@ -1,30 +1,19 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Environment variables
+.env
+.env.local
 
-# dependencies
-/node_modules
+# Node modules
+node_modules/
 
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# debug
+# Logs
+*.log
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
 
-# env files
-.env*
+# Keys (DKIM private keys - NEVER commit these!)
+keys/
+*.pem
+*.key
 
-# vercel
-.vercel
-
-# heroku
-.heroku
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# OS files
+.DS_Store
+Thumbs.db

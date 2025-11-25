@@ -13,18 +13,22 @@ router.post('/register', async (req, res) => {
     const { name, email, password } = req.body;
 
     try {
+        // Normalize email to lowercase for consistency
+        const normalizedEmail = email.toLowerCase().trim();
+        
         // Validate email domain - only allow @miracmail.com
         const allowedDomain = '@miracmail.com';
-        if (!email.toLowerCase().endsWith(allowedDomain)) {
+        if (!normalizedEmail.endsWith(allowedDomain)) {
             return res.status(400).json({ msg: `Only emails ending with ${allowedDomain} are allowed` });
         }
 
-        let user = await User.findOne({ email });
+        // Check if user with this email already exists (case-insensitive)
+        let user = await User.findOne({ email: normalizedEmail });
         if (user) {
-            return res.status(400).json({ msg: 'User already exists' });
+            return res.status(400).json({ msg: 'This email address is already registered' });
         }
 
-        user = new User({ name, email, password });
+        user = new User({ name, email: normalizedEmail, password });
 
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(password, salt);
@@ -38,6 +42,10 @@ router.post('/register', async (req, res) => {
             res.json({ token });
         });
     } catch (err) {
+        // Handle MongoDB duplicate key error (unique constraint violation)
+        if (err.code === 11000 || err.code === 11001) {
+            return res.status(400).json({ msg: 'This email address is already registered' });
+        }
         console.error(err.message);
         res.status(500).send('Server error');
     }
@@ -51,7 +59,9 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        let user = await User.findOne({ email });
+        // Normalize email to lowercase for case-insensitive login
+        const normalizedEmail = email.toLowerCase().trim();
+        let user = await User.findOne({ email: normalizedEmail });
         if (!user) {
             return res.status(400).json({ msg: 'Invalid Credentials' });
         }
