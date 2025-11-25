@@ -1,0 +1,31 @@
+{
+  "name": "Email Service Server",
+  "description": "Backend for Email Service with SMTP support",
+  "repository": "https://github.com/your-username/email-generator-backend",
+  "logo": "",
+  "keywords": ["node", "express", "email", "smtp"],
+  "image": "heroku/nodejs",
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "env": {
+    "NODE_ENV": {
+      "value": "production"
+    },
+    "PORT": {
+      "value": "5000"
+    },
+    "SMTP_PORT": {
+      "value": "2525"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "free"
+    }
+  }
+}
+
